@@ -7,9 +7,10 @@ function Login() {
     const BASE_URL = "https://crmapp-aola.onrender.com/crmapp/api/v1/";
     const [showSignUpPage, setShowSignUpPage] = useState(false);
     const [userType, setUserType] = useState("");
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
     const toggleSignUp = () => {
         setShowSignUpPage(!showSignUpPage);
-        console.log(showSignUpPage)
     }
 
     const loginFn = (event) => {
@@ -17,12 +18,19 @@ function Login() {
         const password = document.getElementById("password").value;
         const userData = { email, password }
         event.preventDefault();
-        console.log(userData);
-
         axios.post(BASE_URL + 'auth/signin', userData)
             .then(function (response) {
-                console.log(response);
+                setError("");
+                setMessage("Successfully Signed in!!!");
+                if(!localStorage.getItem("appLoggedIn")){
+                    //trigger the guidance flow
+                    console.log("trigger the guidance flow");
+                }else{
+                    console.log("don't trigger the guidance flow");
+                }
+
                 if (response.status === 201) {
+                    localStorage.setItem("appLoggedIn", true);
                     localStorage.setItem("token", response.data.token);
                     localStorage.setItem("email", response.data.userData.email);
                     localStorage.setItem("name", response.data.userData.name);
@@ -44,10 +52,10 @@ function Login() {
                         window.location.href = "/customer";
                         break;
                 }
+                setMessage("");
             })
             .catch(function (error) {
-                console.log("error from sign in");
-                console.log(JSON.stringify(error));
+                setError(error.response.data);
             });
     }
 
@@ -62,12 +70,13 @@ function Login() {
 
         axios.post(BASE_URL + 'auth/signup', userData)
             .then(function (response) {
-                console.log("response from sign up");
-                console.log(response);
+                setError("");
+                setMessage("Successfully Signed up!!!");
+                toggleSignUp();
+                setMessage(""); 
             })
             .catch(function (error) {
-                console.log("error from sign up");
-                console.log(JSON.stringify(error));
+                setError(error.response.data);
             });
     }
 
@@ -102,7 +111,6 @@ function Login() {
                                                             <input type="email" className="form-control" name="Email" id="email" placeholder='Enter your email' />
                                                         </div>
                                                     </div>
-
                                                     <div class="col-12">
                                                         <label>Password<span class="text-danger">*</span></label>
                                                         <div class="input-group">
@@ -110,7 +118,6 @@ function Login() {
                                                             <input type="password" className="form-control" name="Password" id="password" placeholder='Enter password' />
                                                         </div>
                                                     </div>
-
                                                     <div class="col-12">
                                                         <label>Organization<span class="text-danger">*</span></label>
                                                         <div class="input-group">
@@ -118,7 +125,6 @@ function Login() {
                                                             <input type="text" className="form-control" name="clientName" id="clientName" placeholder='Enter Organization' />
                                                         </div>
                                                     </div>
-
                                                     <div class="col-12">
                                                         <label>User Type<span class="text-danger">*</span></label>
                                                         <div class="input-group">
@@ -129,45 +135,42 @@ function Login() {
                                                             </DropdownButton>
                                                         </div>
                                                     </div>
-
                                                     <div class="col-sm-8">
                                                         <div onClick={toggleSignUp} class="float-end text-primary">Already have an account? Sign In</div>
                                                     </div>
-
+                                                    <div class="col-12" className={error?'text-danger text-center': 'text-success text-center'}>{error ? error : message}</div>
                                                     <div class="col-12">
                                                         <button type="submit" class="btn btn-primary px-4 float-end mt-4">Sign Up</button>
                                                     </div>
+                                                    </form>
+                                            )
+                                            :
+                                            (
+                                                <form onSubmit={loginFn} class="row g-4">
+                                                    {error}
+                                                    <div class="col-12">
+                                                        <label>Email Address<span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-text"><i class="bi bi-envelope-fill"></i></div>
+                                                            <input type="email" id="email" placeholder="Enter email address" className="form-control" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label>Password<span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-text"><i class="bi bi-lock-fill"></i></div>
+                                                            <input type="password" id="password" placeholder="Enter password" className='form-control' />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-8">
+                                                        <div onClick={toggleSignUp} class="float-end text-primary">Don't have an account? Sign Up</div>
+                                                    </div>
+                                                    <div class="col-12" className={error?'text-danger text-center': 'text-success text-center'}>{error ? error : message}</div>
+                                                    <div class="col-12">
+                                                        <button type="submit" class="btn btn-primary px-4 float-end mt-4">Sign In</button>
+                                                    </div>                            
                                                 </form>
                                             )
-                                                :
-                                                (
-                                                    <form onSubmit={loginFn} class="row g-4">
-                                                        <div class="col-12">
-                                                            <label>Email Address<span class="text-danger">*</span></label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-text"><i class="bi bi-envelope-fill"></i></div>
-                                                                <input type="email" id="email" placeholder="Enter email address" className="form-control" />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-12">
-                                                            <label>Password<span class="text-danger">*</span></label>
-                                                            <div class="input-group">
-                                                                <div class="input-group-text"><i class="bi bi-lock-fill"></i></div>
-                                                                <input type="password" id="password" placeholder="Enter password" className='form-control' />
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-sm-8">
-                                                            <div onClick={toggleSignUp} class="float-end text-primary">Don't have an account? Sign Up</div>
-                                                        </div>
-
-                                                        <div class="col-12">
-                                                            <button type="submit" class="btn btn-primary px-4 float-end mt-4">Sign In</button>
-                                                        </div>
-                                                    </form>
-
-                                                )
                                         }
                                     </div>
                                 </div>
